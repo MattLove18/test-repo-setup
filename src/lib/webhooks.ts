@@ -36,3 +36,11 @@ export function authorizeWebhook(request: Request, secret: string | undefined): 
   const headerSecret = request.headers.get("x-webhook-secret") ?? "";
   return bearer === secret || querySecret === secret || headerSecret === secret;
 }
+
+export function inboundWebhookUrl(origin: string, secret?: string): string {
+  const base = `${origin.replace(/\/$/, "")}/api/webhooks/ghl`;
+  if (!secret) return base;
+  const url = new URL(base);
+  url.searchParams.set("secret", secret);
+  return url.toString();
+}

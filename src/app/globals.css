@@ -624,13 +624,68 @@ a.ghost-btn {
   margin: 0 0 12px;
 }
 
-.connect-form input {
+.connect-form input,
+.connect-form select {
   background: hsl(220 18% 9%);
   border: 1px solid hsl(var(--gold) / 0.28);
   color: hsl(var(--cream));
   padding: 8px 10px;
   width: 100%;
   font-family: var(--font-body), system-ui, sans-serif;
+}
+
+.keep-live {
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid hsl(var(--gold) / 0.22);
+}
+
+.keep-live h3 {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 500;
+  font-size: 1.15rem;
+  margin: 0 0 10px;
+}
+
+.keep-live ul {
+  margin: 0 0 14px;
+  padding-left: 18px;
+  color: hsl(var(--muted));
+  font-size: 0.9rem;
+}
+
+.keep-live li + li {
+  margin-top: 8px;
+}
+
+.keep-live strong {
+  color: hsl(var(--cream));
+}
+
+.webhook-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.webhook-row input {
+  flex: 1;
+}
+
+.keep-live-note {
+  margin: 8px 0 12px;
+  color: hsl(var(--muted));
+  font-size: 0.86rem;
+}
+
+.env-snippet {
+  margin: 0 0 10px;
+  padding: 10px;
+  background: hsl(220 18% 9%);
+  border: 1px solid hsl(var(--gold) / 0.22);
+  color: hsl(var(--cream));
+  font-size: 0.78rem;
+  overflow-x: auto;
 }
 
 @media (max-width: 900px) {

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { inboundWebhookUrl } from "@/lib/webhooks";
 
 type PipelineOption = { id: string; name: string };
 
@@ -22,8 +23,11 @@ export function ConnectHubForm() {
   const [status, setStatus] = useState<Status | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [webhookUrl, setWebhookUrl] = useState("");
+  const [copied, setCopied] = useState<"webhook" | "env" | null>(null);
 
   useEffect(() => {
+    setWebhookUrl(inboundWebhookUrl(window.location.origin));
     void fetch("/api/hub", { cache: "no-store" })
       .then((response) => response.json())
       .then((data: Status) => {
@@ -59,7 +63,7 @@ export function ConnectHubForm() {
       if (payload.pipeline?.id) setPipelineId(payload.pipeline.id);
       setMessage(
         payload.pipelines?.length
-          ? `Connected. Loaded ${payload.pipelines.length} pipeline${payload.pipelines.length === 1 ? "" : "s"} from Captivation Hub.`
+          ? `Connected. Loaded ${payload.pipelines.length} pipeline${payload.pipelines.length === 1 ? "" : "s"} from Captivation Hub. Open the drawing to see live households.`
           : "Connected. This location has no pipelines yet — add one in Hub Opportunities.",
       );
     } catch (error) {
@@ -86,7 +90,19 @@ export function ConnectHubForm() {
     setBusy(false);
   }
 
+  async function copy(kind: "webhook" | "env", text: string) {
+    await navigator.clipboard.writeText(text);
+    setCopied(kind);
+    window.setTimeout(() => setCopied(null), 2000);
+  }
+
   const envLocked = status?.source === "env";
+  const envSnippet = [
+    "GHL_API_KEY=pit-…",
+    "GHL_LOCATION_ID=your-location-id",
+    "GHL_PIPELINE_ID=optional-pipeline-id",
+    "GHL_WEBHOOK_SECRET=optional-shared-secret",
+  ].join("\n");
 
   return (
     <div className="connect-layout">
@@ -137,8 +153,20 @@ export function ConnectHubForm() {
           <div>
             <h2>Paste and test</h2>
             <p>
-              We call Hub’s pipeline API. If it works, the drawing stores an httpOnly session cookie
-              and starts two-way sync. We never show the token again.
+              Paste the token only on this page — never in chat. We call Hub’s pipeline API. If it
+              works, the drawing stores an httpOnly session cookie and loads your real opportunities.
+            </p>
+          </div>
+        </li>
+        <li>
+          <span>05</span>
+          <div>
+            <h2>Keep it live</h2>
+            <p>
+              This browser stays connected for 180 days. Drag or Advance writes the stage back to Hub
+              immediately. The drawing re-pulls Hub every 20 seconds. For always-on (every browser,
+              after a new deploy), put the same token in Vercel env vars, then add a Hub workflow
+              webhook to the URL on the connection sheet.
             </p>
           </div>
         </li>
@@ -182,7 +210,7 @@ export function ConnectHubForm() {
             required
           />
         </label>
-        {status?.pipelines && status.pipelines.length > 1 ? (
+        {status?.pipelines && status.pipelines.length > 0 ? (
           <label className="move-label">
             Pipeline to draw
             <select
@@ -221,6 +249,58 @@ export function ConnectHubForm() {
               Disconnect Hub
             </button>
           ) : null}
+        </div>
+
+        <div className="keep-live">
+          <p className="spec-kicker">Stay connected</p>
+          <h3>How updates keep moving</h3>
+          <ul>
+            <li>
+              <strong>Drawing → Hub:</strong> drag a card or use Advance. The stage writes back to
+              Captivation Hub on that click.
+            </li>
+            <li>
+              <strong>Hub → drawing:</strong> this page re-pulls opportunities every 20 seconds while
+              the board is open. Point a Hub workflow at the webhook so Hub changes show up without
+              waiting on the poll.
+            </li>
+            <li>
+              <strong>This browser:</strong> the httpOnly session lasts 180 days. Claim this Vercel
+              site first — an unclaimed temporary URL expires and the cookie dies with it.
+            </li>
+            <li>
+              <strong>Always on:</strong> after you claim the deploy, add these in Vercel → Project →
+              Settings → Environment Variables, then redeploy. That keeps Hub linked for every
+              visitor without pasting the token again.
+            </li>
+          </ul>
+          <label className="move-label">
+            Hub workflow webhook
+            <span className="webhook-row">
+              <input readOnly value={webhookUrl} />
+              <button
+                type="button"
+                className="ghost-btn"
+                onClick={() => void copy("webhook", webhookUrl)}
+                disabled={!webhookUrl}
+              >
+                {copied === "webhook" ? "Copied" : "Copy"}
+              </button>
+            </span>
+          </label>
+          <p className="keep-live-note">
+            In Hub: Automation → Workflow → add a Webhook action on Opportunity created / updated /
+            stage changed. POST to the URL above. Optional shared secret:{" "}
+            <code>?secret=</code> plus <code>GHL_WEBHOOK_SECRET</code>.
+          </p>
+          <pre className="env-snippet">{envSnippet}</pre>
+          <button
+            type="button"
+            className="ghost-btn"
+            onClick={() => void copy("env", envSnippet)}
+          >
+            {copied === "env" ? "Copied env names" : "Copy env names"}
+          </button>
         </div>
       </form>
     </div>

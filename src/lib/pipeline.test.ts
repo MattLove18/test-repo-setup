@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { daysBetween, overlayForIndex, stuckThresholdForIndex } from "./architecture";
 import { decorateStages, nextStepsForStage, summaryForStage } from "./next-steps";
 import { mapOpportunity } from "./pipeline-service";
-import { authorizeWebhook, parseWebhookOpportunityId, shouldIgnoreInboundWebhook } from "./webhooks";
+import { authorizeWebhook, inboundWebhookUrl, parseWebhookOpportunityId, shouldIgnoreInboundWebhook } from "./webhooks";
 import { markOutbound } from "./ghl";
 import { moveDemoProspect, resetDemoProspects, seedProspects } from "./demo-data";
 
@@ -130,6 +130,15 @@ describe("webhooks", () => {
     expect(authorizeWebhook(request, "blueprint")).toBe(true);
     expect(authorizeWebhook(request, "other")).toBe(false);
     expect(authorizeWebhook(request, undefined)).toBe(true);
+  });
+
+  it("builds the inbound Hub webhook URL for this origin", () => {
+    expect(inboundWebhookUrl("https://temporary-rapid-mandolin-elhp7wz.vercel.app")).toBe(
+      "https://temporary-rapid-mandolin-elhp7wz.vercel.app/api/webhooks/ghl",
+    );
+    expect(inboundWebhookUrl("https://example.com/", "blueprint")).toBe(
+      "https://example.com/api/webhooks/ghl?secret=blueprint",
+    );
   });
 });
 

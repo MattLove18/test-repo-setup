@@ -40,11 +40,16 @@ Open **Connect Captivation Hub** on the drawing (`/connect`) and follow the shee
 4. Enable Opportunities (view + edit) and Contacts (view). Copy the token immediately.
 5. Paste token + Location ID and click **Test connection**.
 
-A successful test stores an httpOnly session cookie and loads live opportunities. Drag or Advance on the drawing writes the stage back to Hub.
+A successful test stores an httpOnly session cookie (180 days) and loads live opportunities. Drag or Advance on the drawing writes the stage back to Hub immediately. While the drawing is open it re-pulls Hub every 20 seconds.
 
 If Private Integrations is missing: Settings → Labs → enable it, or switch from agency view into the sub-account.
 
-You can still set server env vars instead of the connect form (Vercel project settings, or `.env.local`):
+### Keep the connection
+
+Paste the token only on `/connect`, never in chat or email.
+
+- **This browser:** the session cookie keeps Hub linked for 180 days. Claim the Vercel deploy first so the URL does not expire.
+- **Always on:** after claiming, add env vars in Vercel → Project → Settings → Environment Variables, then redeploy:
 
 ```bash
 GHL_API_KEY=pit-...
@@ -53,7 +58,8 @@ GHL_PIPELINE_ID=          # optional; otherwise the app prefers a pipeline named
 GHL_WEBHOOK_SECRET=       # optional shared secret for /api/webhooks/ghl
 ```
 
-Optional webhook: in Hub, add a workflow that fires on opportunity created/updated/stage changed and POSTs to `https://<your-domain>/api/webhooks/ghl?secret=<GHL_WEBHOOK_SECRET>`.
+- **Hub → drawing without waiting:** in Hub, Automation → Workflow → Webhook on opportunity created / updated / stage changed, POST to `https://<your-domain>/api/webhooks/ghl` (add `?secret=` if you set `GHL_WEBHOOK_SECRET`).
+- **Drawing → Hub:** drag a household or click Advance. That `PUT`s the opportunity stage in Captivation Hub.
 
 If the token is missing or Hub errors, the drawing falls back to the sample households and shows the reason in the title strip.
 
@@ -69,4 +75,4 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Deploy
 
-This repo is a Next.js app. Vercel (already used for this project) will build `npm run build` automatically. Add the Hub env vars in the Vercel project, then redeploy.
+This repo is a Next.js app. Vercel builds `npm run build` automatically. Claim the deploy, add the Hub env vars in the Vercel project, then redeploy so every visitor sees the live pipeline without pasting a token.

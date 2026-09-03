@@ -46,10 +46,15 @@ export function BlueprintApp() {
 
   useEffect(() => {
     if (!snapshot?.connected) return;
-    const timer = window.setInterval(() => {
-      void load();
-    }, 45_000);
-    return () => window.clearInterval(timer);
+    const tick = () => {
+      if (document.visibilityState === "visible") void load();
+    };
+    const timer = window.setInterval(tick, 20_000);
+    document.addEventListener("visibilitychange", tick);
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", tick);
+    };
   }, [snapshot?.connected, load]);
 
   const selected = snapshot?.prospects.find((item) => item.id === selectedId) ?? null;
@@ -172,7 +177,11 @@ export function BlueprintApp() {
           </div>
           <div>
             <dt>Source</dt>
-            <dd>{snapshot.connected ? "Captivation Hub" : "Blueprint sample"}</dd>
+            <dd>
+              {snapshot.connected
+                ? snapshot.pipeline.name || "Captivation Hub"
+                : "Blueprint sample"}
+            </dd>
           </div>
         </dl>
       </header>
@@ -227,8 +236,14 @@ export function BlueprintApp() {
             <select
               value={snapshot.pipeline.id}
               onChange={(event) => {
-                pipelineIdRef.current = event.target.value;
-                void load(event.target.value);
+                const nextId = event.target.value;
+                pipelineIdRef.current = nextId;
+                void fetch("/api/hub", {
+                  method: "PATCH",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ pipelineId: nextId }),
+                });
+                void load(nextId);
               }}
             >
               {snapshot.pipelines.map((pipeline) => (
@@ -247,6 +262,12 @@ export function BlueprintApp() {
         </a>
       </div>
 
+      {snapshot.connected ? (
+        <p className="sync-banner is-notice">
+          Live from Captivation Hub. Drag or Advance writes the stage back. Hub changes re-pull
+          every 20 seconds while this drawing is open.
+        </p>
+      ) : null}
       {snapshot.message ? (
         <p className="sync-banner">
           {snapshot.message}{" "}
