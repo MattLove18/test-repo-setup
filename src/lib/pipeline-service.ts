@@ -16,6 +16,8 @@ import {
   updateOpportunityStage,
   updateOpportunityStatus,
   markOutbound,
+  explainHubError,
+  type GhlConfig,
   type GhlOpportunity,
   type GhlPipeline,
 } from "./ghl";
@@ -96,7 +98,7 @@ function demoSnapshot(message?: string): PipelineSnapshot {
     syncedAt: new Date().toISOString(),
     message:
       message ??
-      "Blueprint is running on sample households. Add GHL_API_KEY and GHL_LOCATION_ID to two-way sync Captivation Hub.",
+      "Blueprint is running on sample households. Connect Captivation Hub to two-way sync your real pipeline.",
   };
 }
 
@@ -109,14 +111,16 @@ function stagesFromPipeline(pipeline: GhlPipeline): PipelineStage[] {
   return decorateStages(raw, overlayForIndex);
 }
 
-export async function loadPipeline(pipelineId?: string): Promise<PipelineSnapshot> {
-  const config = readGhlConfig();
+export async function loadPipeline(
+  pipelineId?: string,
+  config: GhlConfig | null = readGhlConfig(),
+): Promise<PipelineSnapshot> {
   if (!config) {
     return demoSnapshot();
   }
   try {
     const pipelines = await listPipelines(config);
-    const selected = pickPipeline(pipelines, pipelineId ?? preferredPipelineId());
+    const selected = pickPipeline(pipelines, pipelineId ?? preferredPipelineId(config));
     if (!selected) {
       return demoSnapshot("Captivation Hub is connected, but this location has no pipelines yet.");
     }
@@ -135,17 +139,19 @@ export async function loadPipeline(pipelineId?: string): Promise<PipelineSnapsho
       syncedAt: new Date().toISOString(),
     };
   } catch (error) {
-    const detail = error instanceof Error ? error.message : "Unknown error";
-    return demoSnapshot(`Captivation Hub sync failed, showing the blueprint sample. ${detail}`);
+    return demoSnapshot(`Captivation Hub sync failed, showing the blueprint sample. ${explainHubError(error)}`);
   }
 }
 
-export async function moveProspect(id: string, stageId: string): Promise<MoveResult> {
-  const config = readGhlConfig();
+export async function moveProspect(
+  id: string,
+  stageId: string,
+  config: GhlConfig | null = readGhlConfig(),
+): Promise<MoveResult> {
   if (!config) {
     return { source: "demo", prospect: moveDemoProspect(id, stageId) };
   }
-  const snapshot = await loadPipeline();
+  const snapshot = await loadPipeline(undefined, config);
   const stage = snapshot.stages.find((item) => item.id === stageId);
   if (!stage) {
     throw new Error("Unknown pipeline stage");
@@ -171,14 +177,14 @@ export async function moveProspect(id: string, stageId: string): Promise<MoveRes
 export async function setProspectStatus(
   id: string,
   status: OpportunityStatus,
+  config: GhlConfig | null = readGhlConfig(),
 ): Promise<MoveResult> {
-  const config = readGhlConfig();
   if (!config) {
     return { source: "demo", prospect: updateDemoStatus(id, status) };
   }
   markOutbound(id);
   await updateOpportunityStatus(config, id, status);
-  const snapshot = await loadPipeline();
+  const snapshot = await loadPipeline(undefined, config);
   const prospect = snapshot.prospects.find((item) => item.id === id);
   if (!prospect) {
     throw new Error("Opportunity updated in Captivation Hub but is no longer on this pipeline");

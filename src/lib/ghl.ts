@@ -38,20 +38,39 @@ export type GhlOpportunity = {
   notes?: string;
 };
 
-type GhlConfig = {
+export type GhlConfig = {
   apiKey: string;
   locationId: string;
+  pipelineId?: string;
 };
 
 export function readGhlConfig(): GhlConfig | null {
   const apiKey = process.env.GHL_API_KEY?.trim();
   const locationId = process.env.GHL_LOCATION_ID?.trim();
   if (!apiKey || !locationId) return null;
-  return { apiKey, locationId };
+  return {
+    apiKey,
+    locationId,
+    pipelineId: process.env.GHL_PIPELINE_ID?.trim() || undefined,
+  };
 }
 
-export function preferredPipelineId(): string | undefined {
-  return process.env.GHL_PIPELINE_ID?.trim() || undefined;
+export function preferredPipelineId(config?: GhlConfig | null): string | undefined {
+  return config?.pipelineId || process.env.GHL_PIPELINE_ID?.trim() || undefined;
+}
+
+export function explainHubError(error: unknown): string {
+  const message = error instanceof Error ? error.message : "Unknown error";
+  if (/\(401\)/.test(message)) {
+    return "Captivation Hub rejected the token. Create a new Private Integration and paste the token immediately — Hub only shows it once.";
+  }
+  if (/\(403\)/.test(message)) {
+    return "The token is missing permission. Edit the Private Integration and enable Opportunities (view + edit) and Contacts (view).";
+  }
+  if (/\(422\)/.test(message)) {
+    return "The Location ID does not match this token. Copy the ID from the sub-account URL after /location/.";
+  }
+  return message;
 }
 
 async function ghlFetch<T>(

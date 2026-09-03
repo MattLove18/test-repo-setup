@@ -32,10 +32,19 @@ Captivation Hub is a white-label of GoHighLevel. This app talks to the same Lead
 
 ## Connect your location
 
-1. In Captivation Hub, open the sub-account → **Settings → Private Integrations**.
-2. Create a token with `opportunities.readonly`, `opportunities.write`, and `contacts.readonly`.
-3. Copy the **Location ID** from **Settings → Business Info**.
-4. Set environment variables (Vercel project settings, or a local `.env.local`):
+Open **Connect Captivation Hub** on the drawing (`/connect`) and follow the sheet:
+
+1. Log into Captivation Hub and open the **sub-account** that holds your life-insurance pipeline.
+2. Copy the Location ID from the URL after `/location/` (or paste the whole URL).
+3. Settings → Private Integrations → Create new Integration named **Cash Flow Blueprint**.
+4. Enable Opportunities (view + edit) and Contacts (view). Copy the token immediately.
+5. Paste token + Location ID and click **Test connection**.
+
+A successful test stores an httpOnly session cookie and loads live opportunities. Drag or Advance on the drawing writes the stage back to Hub.
+
+If Private Integrations is missing: Settings → Labs → enable it, or switch from agency view into the sub-account.
+
+You can still set server env vars instead of the connect form (Vercel project settings, or `.env.local`):
 
 ```bash
 GHL_API_KEY=pit-...
@@ -44,7 +53,7 @@ GHL_PIPELINE_ID=          # optional; otherwise the app prefers a pipeline named
 GHL_WEBHOOK_SECRET=       # optional shared secret for /api/webhooks/ghl
 ```
 
-5. Optional webhook: in Hub, add a workflow that fires on opportunity created/updated/stage changed and POSTs to `https://<your-domain>/api/webhooks/ghl?secret=<GHL_WEBHOOK_SECRET>`.
+Optional webhook: in Hub, add a workflow that fires on opportunity created/updated/stage changed and POSTs to `https://<your-domain>/api/webhooks/ghl?secret=<GHL_WEBHOOK_SECRET>`.
 
 If the token is missing or Hub errors, the drawing falls back to the sample households and shows the reason in the title strip.
 

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { moveProspect, setProspectStatus } from "@/lib/pipeline-service";
+import { resolveHubConfig } from "@/lib/hub-session";
 import type { OpportunityStatus } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -15,13 +16,14 @@ export async function PATCH(
     stageId?: string;
     status?: OpportunityStatus;
   };
+  const config = resolveHubConfig(request);
   try {
     if (body.stageId) {
-      const result = await moveProspect(id, body.stageId);
+      const result = await moveProspect(id, body.stageId, config);
       return NextResponse.json(result);
     }
     if (body.status && STATUSES.has(body.status)) {
-      const result = await setProspectStatus(id, body.status);
+      const result = await setProspectStatus(id, body.status, config);
       return NextResponse.json(result);
     }
     return NextResponse.json({ error: "Provide stageId or status" }, { status: 400 });

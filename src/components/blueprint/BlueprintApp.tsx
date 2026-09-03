@@ -242,9 +242,19 @@ export function BlueprintApp() {
         <button type="button" className="ghost-btn" onClick={() => void load()}>
           Refresh drawing
         </button>
+        <a className="ghost-btn" href="/connect">
+          {snapshot.connected ? "Hub settings" : "Connect Captivation Hub"}
+        </a>
       </div>
 
-      {snapshot.message ? <p className="sync-banner">{snapshot.message}</p> : null}
+      {snapshot.message ? (
+        <p className="sync-banner">
+          {snapshot.message}{" "}
+          {snapshot.connected ? null : (
+            <a href="/connect">Connect Captivation Hub</a>
+          )}
+        </p>
+      ) : null}
       {notice ? <p className="sync-banner is-notice">{notice}</p> : null}
 
       <div className="section-cut">
