@@ -245,6 +245,9 @@ export function BlueprintApp() {
         <a className="ghost-btn" href="/connect">
           {snapshot.connected ? "Hub settings" : "Connect Captivation Hub"}
         </a>
+        <a className="ghost-btn" href="/widget">
+          Desk widget
+        </a>
       </div>
 
       {snapshot.message ? (

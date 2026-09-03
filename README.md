@@ -57,6 +57,21 @@ Optional webhook: in Hub, add a workflow that fires on opportunity created/updat
 
 If the token is missing or Hub errors, the drawing falls back to the sample households and shows the reason in the title strip.
 
+## Mac desk widget (7:00 AM – 5:00 PM Central)
+
+The drawing publishes a short hourly briefing at `/widget` and `GET /api/widget`. It refreshes once an hour while the Franklin desk is open (7:00–17:00 `America/Chicago`) and stays quiet after hours.
+
+**What you do to make it live**
+
+1. **Deploy this app** to Vercel (merge the widget change, or push the branch and let Vercel build).
+2. **Put Hub credentials on the server** if you want the widget to show live households without opening Safari first. In the Vercel project: `GHL_API_KEY` and `GHL_LOCATION_ID` (same Private Integration you already use). The connect form cookies stay on the full drawing; Übersicht cannot send them.
+3. **Optional lock:** set `WIDGET_TOKEN` in Vercel, then open `/widget?token=…` and put the same token on the Übersicht feed URL.
+4. **On the MacBook, pick one:**
+   - **Safari web app (no extra software):** open the live `/widget` URL → File → Add to Dock. Keep that small window on the desktop. It pulls at 7:00 AM, then every 60 minutes until 5:00 PM.
+   - **Desktop widget:** install [Übersicht](https://tracesof.net/uebersicht/), copy `widgets/cashflow-briefing.jsx` into the Übersicht widgets folder, and replace `FEED_URL` with `https://<your-domain>/api/widget` (add `?token=` if you set one).
+
+You do not need an Apple Developer account, and you do not need to schedule anything yourself. After-hours requests get a “desk closed” payload and no Hub refresh.
+
 ## Local development
 
 ```bash
