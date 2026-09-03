@@ -638,3 +638,167 @@ a.ghost-btn {
     grid-template-columns: 1fr;
   }
 }
+
+.desk-shell {
+  min-height: 100vh;
+  padding: 20px 16px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+}
+
+.desk-card {
+  width: min(380px, 100%);
+  border: 1px solid hsl(var(--gold) / 0.4);
+  background:
+    linear-gradient(hsl(var(--gold) / 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--gold) / 0.05) 1px, transparent 1px),
+    hsl(220 22% 7%);
+  background-size: 24px 24px, 24px 24px, auto;
+  padding: 18px 18px 16px;
+  box-shadow: inset 0 0 0 6px hsl(220 22% 5% / 0.55);
+}
+
+.desk-card.is-closed {
+  opacity: 0.92;
+}
+
+.desk-kicker {
+  margin: 0 0 8px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: hsl(var(--gold));
+}
+
+.desk-card h1,
+.desk-setup h1 {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 500;
+  font-size: 1.55rem;
+  margin: 0 0 8px;
+  color: hsl(var(--gold-light));
+}
+
+.desk-summary,
+.desk-help {
+  margin: 0;
+  color: hsl(var(--muted));
+  font-size: 0.92rem;
+}
+
+.desk-help {
+  margin-top: 12px;
+  font-size: 0.8rem;
+}
+
+.desk-help code,
+.desk-setup code {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  color: hsl(var(--gold-light));
+}
+
+.desk-stats {
+  display: flex;
+  gap: 16px;
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+}
+
+.desk-stats strong {
+  display: block;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.2rem;
+  color: hsl(var(--gold-light));
+}
+
+.desk-stats span {
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: hsl(var(--muted));
+}
+
+.desk-items {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.desk-items li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  border: 1px solid hsl(var(--gold) / 0.22);
+  background: hsl(220 20% 8% / 0.92);
+  padding: 8px 10px;
+}
+
+.desk-items li.is-stuck {
+  box-shadow: 0 0 0 1px hsl(var(--danger) / 0.7);
+}
+
+.desk-items strong {
+  display: block;
+  font-size: 0.88rem;
+}
+
+.desk-items span {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.72rem;
+  color: hsl(var(--gold-light));
+}
+
+.desk-items em {
+  font-style: normal;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.68rem;
+  color: hsl(var(--muted));
+  align-self: center;
+}
+
+.desk-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 10px;
+  border-top: 1px dashed hsl(var(--gold) / 0.3);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: hsl(var(--gold) / 0.85);
+}
+
+.desk-setup {
+  width: min(520px, 100%);
+  color: hsl(var(--muted));
+  font-size: 0.92rem;
+}
+
+.desk-setup ol {
+  margin: 8px 0 16px;
+  padding-left: 18px;
+}
+
+.desk-setup li {
+  margin: 8px 0;
+}
+
+.desk-setup a {
+  color: hsl(var(--gold-light));
+}
+
+@media (max-width: 420px) {
+  .desk-foot {
+    flex-direction: column;
+  }
+}
