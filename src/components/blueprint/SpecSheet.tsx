@@ -1,6 +1,7 @@
 "use client";
 
 import { formatCurrency, formatDays } from "@/lib/format";
+import { STUCK_AFTER_DAYS } from "@/lib/architecture";
 import type { OpportunityStatus, PipelineStage, Prospect } from "@/lib/types";
 
 type Props = {
@@ -49,15 +50,15 @@ export function SpecSheet({
         <div>
           <dt>Current bay</dt>
           <dd>
-            {stage?.architecturalName ?? "Unassigned"}
-            <span>{stage?.name}</span>
+            {stage?.name ?? "Unassigned"}
+            <span>{stage?.drawingCode}</span>
           </dd>
         </div>
         <div>
           <dt>Time in bay</dt>
           <dd className={prospect.stuck ? "warn" : undefined}>
             {formatDays(prospect.daysInStage)}
-            <span>{prospect.stuck ? "Behind the drawing schedule" : "On schedule"}</span>
+            <span>{prospect.stuck ? `More than ${STUCK_AFTER_DAYS} days in this stage` : "On schedule"}</span>
           </dd>
         </div>
         <div>
@@ -89,7 +90,7 @@ export function SpecSheet({
       <section className="spec-actions">
         {nextStage ? (
           <button type="button" className="gold-btn" onClick={onAdvance} disabled={saving}>
-            Advance to {nextStage.architecturalName}
+            Advance to {nextStage.name}
           </button>
         ) : (
           <button type="button" className="gold-btn" onClick={() => onStatus("won")} disabled={saving}>
@@ -105,7 +106,7 @@ export function SpecSheet({
           >
             {stages.map((item) => (
               <option key={item.id} value={item.id}>
-                {item.drawingCode} · {item.architecturalName}
+                {item.name}
               </option>
             ))}
           </select>

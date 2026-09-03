@@ -200,7 +200,7 @@ export function BlueprintApp() {
             [
               ["all", "All bays"],
               ["process", "In process"],
-              ["stuck", "Behind schedule"],
+              ["stuck", "10+ days"],
               ["clients", "Clients"],
             ] as const
           ).map(([key, label]) => (
@@ -223,7 +223,7 @@ export function BlueprintApp() {
           </li>
           <li>
             <strong>{stuck}</strong>
-            <span>behind</span>
+            <span>10+ days</span>
           </li>
           <li>
             <strong>{formatCurrency(pipelineValue)}</strong>
@@ -282,7 +282,12 @@ export function BlueprintApp() {
         <div className="roof" aria-hidden>
           <span />
         </div>
-        <div className="bays">
+        <div
+          className="bays"
+          style={{
+            gridTemplateColumns: `repeat(${Math.max(snapshot.stages.length, 1)}, minmax(210px, 1fr))`,
+          }}
+        >
           {snapshot.stages.map((stage) => (
             <StageBay
               key={stage.id}

@@ -206,7 +206,10 @@ export function decorateStages(
     const art = overlay(index, sorted.length);
     return {
       ...stage,
-      ...art,
+      drawingCode: art.drawingCode,
+      // Hub stage names are the bay titles so the drawing matches Captivation Hub.
+      architecturalName: stage.name,
+      bayLabel: stage.name,
       nextStepSummary: summaryForStage(stage.name),
     };
   });

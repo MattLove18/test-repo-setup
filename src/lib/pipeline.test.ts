@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { daysBetween, overlayForIndex, stuckThresholdForIndex } from "./architecture";
+import { daysBetween, isStuck, overlayForIndex, stuckThresholdForIndex } from "./architecture";
 import { decorateStages, nextStepsForStage, summaryForStage } from "./next-steps";
 import { mapOpportunity } from "./pipeline-service";
 import { authorizeWebhook, inboundWebhookUrl, parseWebhookOpportunityId, shouldIgnoreInboundWebhook } from "./webhooks";
@@ -24,9 +24,14 @@ describe("architecture overlay", () => {
     expect(overlayForIndex(7, 9).drawingCode).toBe("A-108");
   });
 
-  it("gives stewardship a year before calling it late", () => {
-    expect(stuckThresholdForIndex(0, 7)).toBe(7);
-    expect(stuckThresholdForIndex(6, 7)).toBe(365);
+  it("flags any stage after more than 10 days, including clients", () => {
+    expect(stuckThresholdForIndex(0, 7)).toBe(10);
+    expect(stuckThresholdForIndex(6, 7)).toBe(10);
+    expect(isStuck({ daysInStage: 10, status: "open" })).toBe(false);
+    expect(isStuck({ daysInStage: 11, status: "open" })).toBe(true);
+    expect(isStuck({ daysInStage: 40, status: "won" })).toBe(true);
+    expect(isStuck({ daysInStage: 90, status: "won" })).toBe(true);
+    expect(isStuck({ daysInStage: 40, status: "lost" })).toBe(false);
   });
 });
 
@@ -40,7 +45,7 @@ describe("next-step playbooks", () => {
     expect(summaryForStage("Pending Medical")).toMatch(/underwriting/i);
   });
 
-  it("decorates CRM stages with drawing codes and playbooks", () => {
+  it("uses Hub stage names as bay titles", () => {
     const stages = decorateStages(
       [
         { id: "a", name: "Lead In", position: 2 },
@@ -49,6 +54,9 @@ describe("next-step playbooks", () => {
       overlayForIndex,
     );
     expect(stages[0].id).toBe("b");
+    expect(stages[0].name).toBe("Discovery Call");
+    expect(stages[0].architecturalName).toBe("Discovery Call");
+    expect(stages[0].bayLabel).toBe("Discovery Call");
     expect(stages[0].drawingCode).toBe("A-101");
     expect(stages[0].nextStepSummary).toMatch(/discovery/i);
   });
@@ -98,12 +106,19 @@ describe("demo store", () => {
     expect(moved.nextSteps[0].label).toMatch(/DEFINE/i);
   });
 
-  it("seeds stuck households in discovery but not seated clients", () => {
+  it("seeds yellow dwell after 10 days, including seated clients", () => {
     const seeded = seedProspects(Date.parse("2026-09-03T12:00:00.000Z"));
     const samir = seeded.find((row) => row.id === "demo-samir");
+    const ruiz = seeded.find((row) => row.id === "demo-ruiz");
+    const james = seeded.find((row) => row.id === "demo-james");
     const marcus = seeded.find((row) => row.id === "demo-marcus");
+    const hartwell = seeded.find((row) => row.id === "demo-hartwell");
+    expect(ruiz?.daysInStage).toBe(9);
+    expect(ruiz?.stuck).toBe(false);
     expect(samir?.stuck).toBe(true);
-    expect(marcus?.stuck).toBe(false);
+    expect(james?.stuck).toBe(true);
+    expect(marcus?.stuck).toBe(true);
+    expect(hartwell?.stuck).toBe(true);
   });
 });
 

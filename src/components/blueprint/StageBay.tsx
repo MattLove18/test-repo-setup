@@ -1,6 +1,7 @@
 "use client";
 
 import { formatDays } from "@/lib/format";
+import { STUCK_AFTER_DAYS } from "@/lib/architecture";
 import type { PipelineStage, Prospect } from "@/lib/types";
 import { ProspectCard } from "./ProspectCard";
 
@@ -28,6 +29,7 @@ export function StageBay({
   onDragLeave,
 }: Props) {
   const openCount = prospects.filter((item) => item.status === "open" || item.status === "won").length;
+  const stuckHere = prospects.filter((item) => item.stuck);
   return (
     <section
       className={`bay ${dropTarget ? "is-drop" : ""}`}
@@ -51,8 +53,7 @@ export function StageBay({
     >
       <header className="bay-head">
         <p className="bay-code">{stage.drawingCode}</p>
-        <h2>{stage.architecturalName}</h2>
-        <p className="bay-crm">{stage.name}</p>
+        <h2>{stage.name}</h2>
         <p className="bay-count">
           {openCount} {openCount === 1 ? "household" : "households"}
         </p>
@@ -73,10 +74,10 @@ export function StageBay({
           ))
         )}
       </div>
-      {prospects.some((item) => item.stuck) ? (
+      {stuckHere.length > 0 ? (
         <p className="bay-revision">
-          Revision cloud: {prospects.filter((item) => item.stuck).length} sitting beyond{" "}
-          {formatDays(Math.max(...prospects.filter((item) => item.stuck).map((item) => item.daysInStage)))}
+          Yellow shade: {stuckHere.length} in this stage more than {STUCK_AFTER_DAYS} days · longest{" "}
+          {formatDays(Math.max(...stuckHere.map((item) => item.daysInStage)))}
         </p>
       ) : null}
     </section>

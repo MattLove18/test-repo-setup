@@ -252,7 +252,7 @@ body {
 
 .bays {
   display: grid;
-  grid-template-columns: repeat(7, minmax(210px, 1fr));
+  grid-template-columns: repeat(var(--bay-count, 7), minmax(210px, 1fr));
   gap: 0;
   overflow-x: auto;
   border-top: 1px solid hsl(var(--gold) / 0.45);
@@ -308,6 +308,10 @@ body {
   min-height: 2.6em;
 }
 
+.bay-revision {
+  color: hsl(43 90% 62%);
+}
+
 .bay-occupants {
   display: flex;
   flex-direction: column;
@@ -335,7 +339,20 @@ body {
 }
 
 .occupant.is-stuck {
-  box-shadow: 0 0 0 1px hsl(var(--danger) / 0.7);
+  background: hsl(43 88% 52% / 0.42);
+  border-color: hsl(43 90% 62%);
+  box-shadow: inset 0 0 0 1px hsl(43 95% 70% / 0.35);
+}
+
+.occupant.is-stuck:hover,
+.occupant.is-stuck.is-selected {
+  background: hsl(43 88% 54% / 0.55);
+  border-color: hsl(43 95% 70%);
+}
+
+.occupant.is-stuck .occupant-name,
+.occupant.is-stuck .occupant-age {
+  color: hsl(42 100% 92%);
 }
 
 .occupant-mark {
@@ -454,7 +471,7 @@ body {
 }
 
 .spec-grid .warn {
-  color: hsl(var(--danger));
+  color: hsl(43 90% 62%);
 }
 
 .caps {

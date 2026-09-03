@@ -33,26 +33,21 @@ function numberedBay(index: number): ArchitecturalOverlay {
   };
 }
 
-export function stuckThresholdForIndex(index: number, total: number): number {
-  if (total <= 1) return 14;
-  if (index >= total - 1) return 365;
-  const ratio = index / Math.max(total - 1, 1);
-  if (ratio < 0.2) return 7;
-  if (ratio < 0.5) return 10;
-  return 14;
+/** Cards shade yellow after sitting in the same Hub stage longer than this. */
+export const STUCK_AFTER_DAYS = 10;
+
+export function stuckThresholdForIndex(_index?: number, _total?: number): number {
+  return STUCK_AFTER_DAYS;
 }
 
 export function isStuck(input: {
   daysInStage: number;
-  stageIndex: number;
-  stageCount: number;
+  stageIndex?: number;
+  stageCount?: number;
   status: "open" | "won" | "lost" | "abandoned";
 }): boolean {
   if (input.status === "lost" || input.status === "abandoned") return false;
-  if (input.status === "won" || input.stageIndex >= input.stageCount - 1) {
-    return input.daysInStage >= 365;
-  }
-  return input.daysInStage >= stuckThresholdForIndex(input.stageIndex, input.stageCount);
+  return input.daysInStage > STUCK_AFTER_DAYS;
 }
 
 export function daysBetween(fromIso: string | undefined, now = Date.now()): number {
