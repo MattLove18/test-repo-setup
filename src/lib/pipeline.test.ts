@@ -24,9 +24,9 @@ describe("architecture overlay", () => {
     expect(overlayForIndex(7, 9).drawingCode).toBe("A-108");
   });
 
-  it("tightens stuck thresholds at the front of the pipeline", () => {
+  it("gives stewardship a year before calling it late", () => {
     expect(stuckThresholdForIndex(0, 7)).toBe(7);
-    expect(stuckThresholdForIndex(6, 7)).toBe(21);
+    expect(stuckThresholdForIndex(6, 7)).toBe(365);
   });
 });
 
@@ -57,7 +57,15 @@ describe("next-step playbooks", () => {
 describe("opportunity mapping", () => {
   it("computes days in stage and next steps from Hub payloads", () => {
     const stages = decorateStages(
-      [{ id: "uw", name: "Underwriting", position: 0 }],
+      [
+        { id: "inq", name: "Inquiry", position: 0 },
+        { id: "disc", name: "Discovery", position: 1 },
+        { id: "des", name: "Design", position: 2 },
+        { id: "app", name: "Application", position: 3 },
+        { id: "uw", name: "Underwriting", position: 4 },
+        { id: "iss", name: "Issued", position: 5 },
+        { id: "cli", name: "Client", position: 6 },
+      ],
       overlayForIndex,
     );
     const now = Date.parse("2026-09-03T12:00:00.000Z");
@@ -90,10 +98,12 @@ describe("demo store", () => {
     expect(moved.nextSteps[0].label).toMatch(/DEFINE/i);
   });
 
-  it("seeds stuck households in discovery", () => {
+  it("seeds stuck households in discovery but not seated clients", () => {
     const seeded = seedProspects(Date.parse("2026-09-03T12:00:00.000Z"));
     const samir = seeded.find((row) => row.id === "demo-samir");
+    const marcus = seeded.find((row) => row.id === "demo-marcus");
     expect(samir?.stuck).toBe(true);
+    expect(marcus?.stuck).toBe(false);
   });
 });
 

@@ -1,4 +1,4 @@
-import { daysBetween, overlayForIndex, stuckThresholdForIndex } from "./architecture";
+import { daysBetween, isStuck, overlayForIndex } from "./architecture";
 import { decorateStages, nextStepsForStage } from "./next-steps";
 import type { OpportunityStatus, PipelineStage, Prospect } from "./types";
 
@@ -190,7 +190,12 @@ export function seedProspects(now = Date.now()): Prospect[] {
       lastStageChangeAt,
       createdAt: lastStageChangeAt,
       daysInStage,
-      stuck: daysInStage >= stuckThresholdForIndex(stageIndex, demoStages.length),
+      stuck: isStuck({
+        daysInStage,
+        stageIndex,
+        stageCount: demoStages.length,
+        status: row.status ?? "open",
+      }),
       nextSteps: nextStepsForStage(stage),
       notes: row.notes,
     };

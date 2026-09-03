@@ -1,4 +1,4 @@
-import { daysBetween, overlayForIndex, stuckThresholdForIndex } from "./architecture";
+import { daysBetween, isStuck, overlayForIndex } from "./architecture";
 import {
   DEMO_PIPELINE_ID,
   demoStages,
@@ -74,7 +74,12 @@ export function mapOpportunity(
     createdAt: opportunity.createdAt,
     updatedAt: opportunity.updatedAt,
     daysInStage,
-    stuck: daysInStage >= stuckThresholdForIndex(stageIndex, stages.length),
+    stuck: isStuck({
+      daysInStage,
+      stageIndex,
+      stageCount: stages.length,
+      status: asStatus(opportunity.status),
+    }),
     nextSteps: stage ? nextStepsForStage(stage) : [],
     notes: opportunity.notes,
   };
